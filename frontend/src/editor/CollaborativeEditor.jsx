@@ -36,6 +36,9 @@ export default function CollaborativeEditor({
   const [aiInFlight, setAiInFlight] = useState(false);
   const ghostTextRef = useRef('');
   const slashCommandAbortRef = useRef(null);
+  // Tracks the last non-empty selection so rewrite_selection can use it even
+  // after the slash trigger collapses the selection.
+  const lastSelectionRef = useRef(null);
 
   const setGhostText = useCallback((text) => {
     ghostTextRef.current = text;
@@ -70,8 +73,33 @@ export default function CollaborativeEditor({
     const fullText = doc.textContent;
     const precedingText = doc.textBetween(0, cursorPos, '\n', '\n');
     const followingText = doc.textBetween(cursorPos, doc.content.size, '\n', '\n');
-    const { from, to } = selection;
-    const selectedText = from !== to ? doc.textBetween(from, to, '\n') : null;
+
+    // For rewrite_selection, use the captured pre-slash selection rather than the
+    // current (now-collapsed) selection. Typing '/' collapses any prior selection,
+    // so we must read from lastSelectionRef which was set by onSelectionUpdate.
+    let selectedText = null;
+    let rewriteRange = null;
+
+    if (intent === 'rewrite_selection') {
+      const captured = lastSelectionRef.current;
+      if (!captured || !captured.text) {
+        // No selection was captured — surface a clear message, do not fire request
+        editorInstance
+          .chain()
+          .focus()
+          .insertContentAt(cursorPos, {
+            type: 'text',
+            text: ' [Select text first to rewrite it]',
+          })
+          .run();
+        return;
+      }
+      selectedText = captured.text;
+      rewriteRange = { from: captured.from, to: captured.to };
+    } else {
+      const { from, to } = selection;
+      selectedText = from !== to ? doc.textBetween(from, to, '\n') : null;
+    }
 
     setAiInFlight(true);
     onContextChange?.({ intent, charsCount: precedingText.length + followingText.length });
@@ -126,19 +154,33 @@ export default function CollaborativeEditor({
       }
 
       if (accumulated) {
-        const insertPos = editorInstance.state.selection.$head.pos;
         const markType = editorInstance.state.schema.marks.aiSuggestion;
-        editorInstance
-          .chain()
-          .focus()
-          .insertContentAt(insertPos, {
-            type: 'text',
-            text: accumulated,
-            marks: markType
-              ? [{ type: 'aiSuggestion', attrs: { status: 'accepted' } }]
-              : [],
-          })
-          .run();
+        const markAttrs = markType ? [{ type: 'aiSuggestion', attrs: { status: 'accepted' } }] : [];
+
+        if (intent === 'rewrite_selection' && rewriteRange) {
+          // Replace the originally captured selection range, not insert at cursor
+          editorInstance
+            .chain()
+            .focus()
+            .insertContentAt(
+              { from: rewriteRange.from, to: rewriteRange.to },
+              { type: 'text', text: accumulated, marks: markAttrs }
+            )
+            .run();
+          // Clear the captured selection so a stale range isn't reused
+          lastSelectionRef.current = null;
+        } else {
+          const insertPos = editorInstance.state.selection.$head.pos;
+          editorInstance
+            .chain()
+            .focus()
+            .insertContentAt(insertPos, {
+              type: 'text',
+              text: accumulated,
+              marks: markAttrs,
+            })
+            .run();
+        }
         onStatsChange?.('accepted');
       }
     } catch (err) {
@@ -209,6 +251,20 @@ export default function CollaborativeEditor({
         intent: 'continue_paragraph',
         charsCount: precedingText.length + followingText.length,
       });
+    },
+
+    onSelectionUpdate: ({ editor: ed }) => {
+      const { doc, selection } = ed.state;
+      const { from, to } = selection;
+      // Only capture non-empty (range) selections — do NOT overwrite when
+      // the selection collapses (e.g., after the user types '/' to open slash menu)
+      if (from !== to) {
+        lastSelectionRef.current = {
+          from,
+          to,
+          text: doc.textBetween(from, to, '\n'),
+        };
+      }
     },
   });
 

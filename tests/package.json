@@ -1,7 +1,5 @@
 {
   "name": "collaborative-editor-tests",
   "version": "1.0.0",
-  "devDependencies": {
-    "@playwright/test": "^1.45.1"
-  }
+  "type": "module"
 }

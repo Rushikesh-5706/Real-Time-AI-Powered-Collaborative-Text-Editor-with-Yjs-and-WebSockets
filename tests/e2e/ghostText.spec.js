@@ -52,9 +52,11 @@ test('ghost text appears while AI request is in flight and grows incrementally',
   await page.waitForTimeout(300);
   const text2 = await ghostText.textContent();
 
-  // Either text grew, or it was already complete — both are valid
-  expect(text1 !== null).toBe(true);
-  expect(text2 !== null).toBe(true);
+  // Verify ghost text content is real and grew (or was already complete)
+  // text2 must be at least as long as text1 — it must never shrink mid-stream
+  expect(text1).not.toBeNull();
+  expect(text2).not.toBeNull();
+  expect(text2.length).toBeGreaterThanOrEqual(text1.length);
 });
 
 test('Tab accepts ghost text and creates ai-suggestion-accepted element', async ({ page }) => {

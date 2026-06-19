@@ -1,29 +1,26 @@
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
 
-const COMMANDS = [
-  { id: 'slash-cmd-expand', label: 'Expand', description: 'Expand text with more detail', icon: '↗', color: '#3b82f6' },
-  { id: 'slash-cmd-summarise', label: 'Summarise', description: 'Summarise text above cursor', icon: '⊞', color: '#10b981' },
-  { id: 'slash-cmd-rewrite', label: 'Rewrite', description: 'Rewrite selected text', icon: '↺', color: '#f59e0b' },
-  { id: 'slash-cmd-todo', label: 'To-do list', description: 'Convert to checklist', icon: '☑', color: '#8b5cf6' },
-  { id: 'slash-cmd-translate', label: 'Translate', description: 'Translate to Hindi', icon: '⇄', color: '#f43f5e' },
-];
+// IMPORTANT: This component intentionally has NO local COMMANDS list.
+// The authoritative list (with `intent` fields) lives in slashCommandExtension.js
+// and is passed in via props.commands. Duplicating it here previously caused
+// intent: undefined to be sent on every slash-command click (Bug 1).
 
 const SlashCommandMenu = forwardRef((props, ref) => {
-  const { command } = props;
+  const { command, commands = [] } = props;
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   useImperativeHandle(ref, () => ({
     onKeyDown: ({ event }) => {
       if (event.key === 'ArrowUp') {
-        setSelectedIndex((i) => (i - 1 + COMMANDS.length) % COMMANDS.length);
+        setSelectedIndex((i) => (i - 1 + commands.length) % commands.length);
         return true;
       }
       if (event.key === 'ArrowDown') {
-        setSelectedIndex((i) => (i + 1) % COMMANDS.length);
+        setSelectedIndex((i) => (i + 1) % commands.length);
         return true;
       }
       if (event.key === 'Enter') {
-        command(COMMANDS[selectedIndex]);
+        command(commands[selectedIndex]);
         return true;
       }
       return false;
@@ -33,7 +30,7 @@ const SlashCommandMenu = forwardRef((props, ref) => {
   return (
     <div data-testid="slash-command-menu" className="slash-command-menu">
       <div className="slash-menu-header">AI Commands</div>
-      {COMMANDS.map((cmd, index) => (
+      {commands.map((cmd, index) => (
         <button
           key={cmd.id}
           data-testid={cmd.id}

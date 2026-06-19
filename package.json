@@ -7,7 +7,8 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test:e2e": "FRONTEND_URL=http://localhost:3000 npx playwright test tests/e2e/ --reporter=list",
+    "test:backend": "cd backend && node --experimental-vm-modules node_modules/.bin/jest --testEnvironment=node --forceExit --rootDir .. --testMatch='**/tests/backend/**/*.test.js' --verbose"
   },
   "keywords": [],
   "author": "",

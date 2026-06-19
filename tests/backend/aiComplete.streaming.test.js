@@ -94,8 +94,8 @@ const runLiveTests = process.env.RUN_LIVE_AI_TESTS === 'true';
     if (timestamps.length > 1) {
       // Verify chunks arrived at different times (not one buffered flush)
       const timeDiff = timestamps[timestamps.length - 1] - timestamps[0];
-      // Groq is fast but we should see at least some spread
-      expect(timeDiff).toBeGreaterThanOrEqual(0);
+      // timeDiff must be positive — if it's 0, the stream was one buffered write
+      expect(timeDiff).toBeGreaterThan(0);
     }
   }, 30000);
 

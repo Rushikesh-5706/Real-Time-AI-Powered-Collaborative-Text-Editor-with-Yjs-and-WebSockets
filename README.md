@@ -85,10 +85,10 @@ Streams AI-generated text via Server-Sent Events.
 cd backend
 npm install
 # Unit/integration tests — no live API needed for prompt routing tests
-node --experimental-vm-modules node_modules/.bin/jest ../../tests/backend/ --testEnvironment=node
+node --experimental-vm-modules node_modules/.bin/jest --testEnvironment=node --forceExit --rootDir .. --testMatch="**/tests/backend/**/*.test.js" --verbose
 
 # With live AI streaming tests:
-BACKEND_URL=http://localhost:3001 RUN_LIVE_AI_TESTS=true node --experimental-vm-modules node_modules/.bin/jest ../../tests/backend/ --testEnvironment=node
+BACKEND_URL=http://localhost:3001 RUN_LIVE_AI_TESTS=true node --experimental-vm-modules node_modules/.bin/jest --testEnvironment=node --forceExit --rootDir .. --testMatch="**/tests/backend/**/*.test.js" --verbose
 ```
 
 Backend test coverage:

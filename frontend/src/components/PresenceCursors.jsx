@@ -13,7 +13,7 @@ export default function PresenceCursors({ users }) {
             <div
               key={sanitized}
               className="presence-item"
-              data-testid={`user-cursor-${sanitized}`}
+              data-testid={`presence-badge-${sanitized}`}
             >
               <div
                 className="presence-avatar"

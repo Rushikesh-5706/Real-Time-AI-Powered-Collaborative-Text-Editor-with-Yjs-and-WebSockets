@@ -36,9 +36,8 @@ test.describe('presence cursors', () => {
     // Give awareness time to propagate over socket
     await page2.waitForTimeout(2000);
 
-    // Both inline cursor (in editor) and sidebar presence panel render data-testid="user-cursor-User1"
-    // Use .first() since there may be multiple matching elements (inline + sidebar)
-    const cursorOnPage2 = page2.locator('[data-testid="user-cursor-User1"]').first();
+    // user-cursor-User1 is now unique — the in-editor Tiptap cursor only
+    const cursorOnPage2 = page2.locator('[data-testid="user-cursor-User1"]');
     await expect(cursorOnPage2).toBeAttached({ timeout: 10000 });
 
     // User2 types — verify User2's cursor appears in page1
@@ -47,8 +46,8 @@ test.describe('presence cursors', () => {
     await page2.keyboard.type('Hello from User2');
     await page1.waitForTimeout(2000);
 
-    // Page1 should see User2's cursor (in editor inline cursor or sidebar)
-    const user2CursorOnPage1 = page1.locator('[data-testid="user-cursor-User2"]').first();
+    // Page1 should see User2's cursor (in-editor inline cursor only)
+    const user2CursorOnPage1 = page1.locator('[data-testid="user-cursor-User2"]');
     await expect(user2CursorOnPage1).toBeAttached({ timeout: 10000 });
 
     await browser.close();
