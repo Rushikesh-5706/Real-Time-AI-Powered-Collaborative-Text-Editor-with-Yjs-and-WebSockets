@@ -35,6 +35,7 @@ export default function CollaborativeEditor({
   const [ghostText, setGhostTextState] = useState('');
   const [aiInFlight, setAiInFlight] = useState(false);
   const ghostTextRef = useRef('');
+  const slashCommandAbortRef = useRef(null);
 
   const setGhostText = useCallback((text) => {
     ghostTextRef.current = text;
@@ -59,6 +60,7 @@ export default function CollaborativeEditor({
     onProviderReady?.(providerRef.current);
     return () => {
       providerRef.current?.destroy();
+      slashCommandAbortRef.current?.abort();
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -74,6 +76,11 @@ export default function CollaborativeEditor({
     setAiInFlight(true);
     onContextChange?.({ intent, charsCount: precedingText.length + followingText.length });
 
+    if (slashCommandAbortRef.current) {
+      slashCommandAbortRef.current.abort();
+    }
+    slashCommandAbortRef.current = new AbortController();
+
     try {
       const response = await fetch(`${BACKEND_URL}/api/ai/complete`, {
         method: 'POST',
@@ -86,6 +93,7 @@ export default function CollaborativeEditor({
           intent,
           selectedText,
         }),
+        signal: slashCommandAbortRef.current.signal,
       });
 
       const reader = response.body.getReader();
@@ -134,9 +142,12 @@ export default function CollaborativeEditor({
         onStatsChange?.('accepted');
       }
     } catch (err) {
-      console.error('slash command AI error intent=' + intent, err.message);
+      if (err.name !== 'AbortError') {
+        console.error('slash command AI error intent=' + intent, err.message);
+      }
     } finally {
       setAiInFlight(false);
+      slashCommandAbortRef.current = null;
     }
   }, [onStatsChange, onContextChange]);
 

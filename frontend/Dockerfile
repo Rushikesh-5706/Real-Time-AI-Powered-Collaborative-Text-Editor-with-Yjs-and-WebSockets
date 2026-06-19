@@ -18,7 +18,7 @@ FROM node:20-alpine AS runtime
 WORKDIR /app
 
 COPY package.json ./
-RUN npm install --omit=dev
+RUN npm install
 
 COPY --from=builder /app/dist ./dist
 COPY vite.config.js ./

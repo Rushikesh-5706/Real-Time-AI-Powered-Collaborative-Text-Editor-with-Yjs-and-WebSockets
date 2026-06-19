@@ -84,6 +84,15 @@ export function registerCollaborationHandlers(io) {
             // Broadcast the removal to the rest of the room
             const encoded = Buffer.from(removalUpdate).toString('base64');
             socket.to(docId).emit('awareness:update', { update: encoded });
+
+            // CRITICAL FIX: Memory Leak Prevention
+            // Check if the room has any clients left. If not, delete the doc from memory.
+            const room = io.sockets.adapter.rooms.get(docId);
+            if (!room || room.size === 0) {
+              docs.delete(docId);
+              awarenesses.delete(docId);
+              console.log(`doc ${docId} removed from memory (0 clients)`);
+            }
           }
 
           console.log(`socket ${socket.id} disconnected from doc ${meta.docId}`);
