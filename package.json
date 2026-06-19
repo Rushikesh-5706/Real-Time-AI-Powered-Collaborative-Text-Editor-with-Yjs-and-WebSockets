@@ -1,0 +1,19 @@
+{
+  "name": "real-time-ai-powered-collaborative-text-editor",
+  "version": "1.0.0",
+  "description": "A browser-based collaborative text editor that synchronizes document state across multiple clients using Yjs CRDTs over Socket.IO. It integrates Groq's LLM API (llama-3.3-70b-versatile) to provide inline ghost-text completions, slash command AI actions, and streaming AI responses — all without writing AI output into the collaboration state until the user explicitly accepts it.",
+  "main": "playwright.config.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.61.0"
+  }
+}
