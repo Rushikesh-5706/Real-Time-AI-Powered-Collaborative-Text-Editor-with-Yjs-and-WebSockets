@@ -36,6 +36,7 @@ export default function CollaborativeEditor({
   const [aiInFlight, setAiInFlight] = useState(false);
   const ghostTextRef = useRef('');
   const slashCommandAbortRef = useRef(null);
+  const [indicatorCoords, setIndicatorCoords] = useState(null);
   // Tracks the last non-empty selection so rewrite_selection can use it even
   // after the slash trigger collapses the selection.
   const lastSelectionRef = useRef(null);
@@ -268,9 +269,22 @@ export default function CollaborativeEditor({
     },
   });
 
+  useEffect(() => {
+    if (aiInFlight && editor && !editor.isDestroyed) {
+      try {
+        const coords = editor.view.coordsAtPos(editor.state.selection.$head.pos);
+        setIndicatorCoords({ left: coords.left, top: coords.bottom + 8 });
+      } catch (err) {
+        setIndicatorCoords(null);
+      }
+    } else {
+      setIndicatorCoords(null);
+    }
+  }, [aiInFlight, editor]);
+
   return (
     <div className="editor-area">
-      {aiInFlight && <AIPresenceIndicator />}
+      {aiInFlight && <AIPresenceIndicator coords={indicatorCoords} />}
       <div className="editor-container">
         <div className="editor-wrapper">
           <EditorContent editor={editor} />

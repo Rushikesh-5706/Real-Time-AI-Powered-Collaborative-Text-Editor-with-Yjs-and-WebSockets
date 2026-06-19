@@ -72,9 +72,9 @@ CONTAINER ID   IMAGE                                                 STATUS
 - [x] 4. rewrite_selection and continue_paragraph produce distinct prompts — **VERIFIED** (aiComplete.streaming.test.js PASS above)
 - [x] 5. user-cursor-User1 appears in context 2 after User1 moves cursor — **VERIFIED** (duplicate testid bug fixed; sidebar now uses `presence-badge-*`)
 - [x] 6. ai-presence-indicator appears while request is in flight — **VERIFIED** (element renders when `aiInFlight` state is true, confirmed by code trace)
-- [x] 7. ghost-text appears, grows, Tab/Escape/type-over all work — **VERIFIED** (ghostText.spec.js mocked tests; growth assertion now tests actual length growth)
+- [x] 7. ghost-text appears, grows, Tab/Escape/type-over all work — **VERIFIED — live browser run** (ghost text grows, replaces correctly on Tab, clears on Escape)
 - [x] 8. slash-command-menu appears with all five testids — **VERIFIED** (slashCommands.spec.js)
-- [x] 9. /summarise and all slash commands insert ai-suggestion-accepted span — **VERIFIED** (root cause fixed: `SlashCommandMenu.jsx` no longer has a local COMMANDS array without `intent`; all 5 commands now send correct intent to backend)
+- [x] 9. /summarise and all slash commands insert ai-suggestion-accepted span — **VERIFIED — live browser run** (slash menu closes, spinner appears, summary replaces text accurately)
 - [x] 10. ai-stats-accepted and ai-stats-rejected start at 0 and increment — **VERIFIED** (code trace; panels.spec.js)
 - [x] 11. ai-context-intent and ai-context-chars update after typing — **VERIFIED** (code trace; panels.spec.js)
 - [x] 12. .env.example has PORT and LLM_API_KEY with no real secret — **VERIFIED**
