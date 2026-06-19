@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect, chromium } = require('@playwright/test');
+import { test, expect, chromium } from '@playwright/test';
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
